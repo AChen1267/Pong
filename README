@@ -1,0 +1,10 @@
+Pong is a game where you and another player control a paddle (long rectangle) to hit a puck (square) towards the other player. If the opponent fails to return the puck, you score a point.
+The physics of this game are pretty simple; if you return the puck and the puck is towards the edge of the paddle (as opposed to the center of it), it will return at an angle.
+Left player controls: W - up, S - down
+Right player controls: UpArrow - up, DownArrow - down
+Start game: spacebar
+Things not fixed/ stuff to add:
+-better coding style
+-better physics
+-paddles can move off the screen
+-start screen?
