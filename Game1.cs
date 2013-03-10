@@ -21,6 +21,8 @@ namespace Pong
         Paddle left;
         Paddle right;
         Ball mBall;
+        const float X_SCALE = 500f;
+        const int CUSHION = 15;
         int rightCount;
         int leftCount;
         SpriteFont score;
@@ -30,7 +32,7 @@ namespace Pong
         Vector2 lPos;
         Vector2 rPos;
         MouseState mouseStateCurrent, mouseStatePrev;
-        int tickCounter;
+        //int tickCounter;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -50,7 +52,7 @@ namespace Pong
             left = new Paddle();
             right = new Paddle();
             mBall = new Ball();
-            rightCount = leftCount = tickCounter = 0;
+            rightCount = leftCount = 0;// = tickCounter = 0;
             base.Initialize();
         }
 
@@ -116,86 +118,41 @@ namespace Pong
             right.Update(gameTime);
             mBall.Update(gameTime);
             
-            if (mBall.Position.X == left.Position.X || mBall.Position.X == right.Position.X)
-                mBall.mDirection.X = -1;
-            if (mBall.Position.X + mBall.Source.Width == left.Source.Width + left.Position.X || mBall.Position.X + mBall.Source.Width == right.Source.Width + right.Position.X)
-                mBall.mDirection.X = 1;
-            //make multiple rectangles per paddle to change Y direction as well
-            Rectangle ballRect = new Rectangle((int)mBall.Position.X, (int)mBall.Position.Y,
-                                        mBall.Source.Width, mBall.Source.Height);  
-
-            Rectangle leftRect = new Rectangle((int)left.Position.X, (int)left.Position.Y + 1,  
-                                        left.Source.Width, left.Source.Height /3 - 1);
-            Rectangle leftRect2 = new Rectangle((int)left.Position.X, (int)(left.Position.Y + left.Source.Height / 3),
-                                        left.Source.Width, left.Source.Height / 3);
-            Rectangle leftRect3 = new Rectangle((int)left.Position.X, (int)(left.Position.Y + left.Source.Height * 2 / 3),
-                                        left.Source.Width, left.Source.Height / 3 - 1);
-            Rectangle leftTop = new Rectangle((int)left.Position.X, (int)left.Position.Y,
-                                        left.Source.Width, 1);
-            Rectangle leftBottom = new Rectangle((int)left.Position.X, (int)left.Position.Y + left.Source.Height,
-                                        left.Source.Width, 1);
-
-
-            Rectangle rightRect = new Rectangle((int)right.Position.X, (int)right.Position.Y - 1,
-                                        right.Source.Width, right.Source.Height / 3 - 1);
-            Rectangle rightRect2 = new Rectangle((int)right.Position.X, (int)(right.Position.Y + right.Source.Height / 3),
-                                        right.Source.Width, right.Source.Height / 3);
-            Rectangle rightRect3 = new Rectangle((int)right.Position.X, (int)(right.Position.Y + right.Source.Height * 2 / 3),
-                                        right.Source.Width, right.Source.Height / 3 - 1);
-            Rectangle rightTop = new Rectangle((int)right.Position.X, (int)right.Position.Y,
-                                        right.Source.Width, 1);
-            Rectangle rightBottom = new Rectangle((int)right.Position.X, (int)right.Position.Y + right.Source.Height,
-                                        right.Source.Width, 1);
-
-            if (ballRect.Intersects(leftTop) || ballRect.Intersects(rightTop) || ballRect.Intersects(leftBottom) || ballRect.Intersects(rightBottom))
+            // new logic
+            if (mBall.center.X - mBall.Source.Width <= left.center.X && mBall.center.X - mBall.Source.Width >= left.center.X - CUSHION) // range "in" the paddle where the paddle can return the ball
             {
-                mBall.mDirection.Y *= -1;
+                float dist = mBall.center.Y - left.center.Y + mBall.Radius();
+                if (Math.Abs(dist) <= left.Source.Height / 2)
+                {
+                    mBall.mSpeed.Y = (float)Math.Pow(Math.Abs(dist), 1.5);
+                    mBall.mDirection.X = 1;
+                    if (dist > 0)
+                        mBall.mDirection.Y = 1;
+                    else
+                        mBall.mDirection.Y = -1;
+                    mBall.mSpeed.X += X_SCALE/(Math.Abs(dist)+.5f); // the .5f is there so we don't divide by 0
+                }
             }
-            if (ballRect.Intersects(leftRect) || ballRect.Intersects(rightRect))  
-            {    
-                mBall.mDirection.X *= -1;            
-                mBall.mSpeed.Y += 50;
-                mBall.mDirection.Y = -1;
-            }
-            if (ballRect.Intersects(leftRect2) && ballRect.Intersects(leftRect))
+            if (mBall.center.X + mBall.Source.Width >= right.center.X && mBall.center.X + mBall.Source.Width <= right.center.X + CUSHION)
             {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.Y += 25;
-                mBall.mDirection.Y = -1;
-            }
-            if (ballRect.Intersects(rightRect2) && ballRect.Intersects(rightRect))
-            {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.Y += 25;
-                mBall.mDirection.Y = -1;
-            }
-            if (ballRect.Intersects(leftRect2) || ballRect.Intersects(rightRect2))      //center
-            {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.X += 20;
-            }
-            if (ballRect.Intersects(leftRect3) && ballRect.Intersects(leftRect2))
-            {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.Y += 25;
-                mBall.mDirection.Y = 1;
-            }
-            if (ballRect.Intersects(rightRect3) && ballRect.Intersects(rightRect2))
-            {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.Y += 25;
-                mBall.mDirection.Y = 1;
-            }
-            if (ballRect.Intersects(leftRect3) || ballRect.Intersects(rightRect3))
-            {
-                mBall.mDirection.X *= -1;
-                mBall.mSpeed.Y += 50;
-                mBall.mDirection.Y = 1;
+                float dist = mBall.center.Y - right.center.Y + mBall.Radius();
+                if (Math.Abs(dist) <= right.Source.Height / 2)
+                {
+                    mBall.mSpeed.Y = (float)Math.Pow(Math.Abs(dist), 1.5);
+                    mBall.mDirection.X = -1;
+                    if (dist > 0)
+                        mBall.mDirection.Y = 1;
+                    else
+                        mBall.mDirection.Y = -1;
+                    mBall.mSpeed.X += X_SCALE/(Math.Abs(dist)+.5f);
+                }
             }
 
             if (mBall.Position.Y > GraphicsDevice.Viewport.Height - mBall.Source.Height || mBall.Position.Y < 0)        //top and bottom
                 mBall.mDirection.Y *= -1;
-
+            
+            if (mBall.mSpeed.X >= mBall.MaxSpeed()) mBall.mSpeed.X = mBall.MaxSpeed();
+            if (mBall.mSpeed.Y >= mBall.MaxSpeed()) mBall.mSpeed.Y = mBall.MaxSpeed();
             if (mBall.Position.X < 0)
             {
                 leftCount++;        //score
@@ -226,13 +183,13 @@ namespace Pong
             if (right.Position.Y < 0)
                 right.Position.Y = 0;
 
-            tickCounter++;  //interval to increase paddle speed
-            if (tickCounter == 100)
-            {
-                left.speedUp();
-                right.speedUp();
-                tickCounter = 0;
-            }
+            //tickCounter++;  //interval to increase paddle speed
+            //if (tickCounter == 100)
+            //{
+            //    left.speedUp();
+            //    right.speedUp();
+            //    tickCounter = 0;
+            //}
 
             base.Update(gameTime);
         }
@@ -254,13 +211,13 @@ namespace Pong
             // Find the center of the string
             Vector2 FontOrigin = score.MeasureString(title) / 2;
             // Draw the string (this one uses 10 args...)
-            spriteBatch.DrawString(score, title, fontPos, Color.LightGreen, 0, FontOrigin, 1.0f, SpriteEffects.FlipHorizontally, 0.5f);
+            spriteBatch.DrawString(score, title, fontPos, Color.WhiteSmoke, 0, FontOrigin, 1.0f, SpriteEffects.FlipHorizontally, 0.5f);
             string lScore = "Left: " + rightCount;
             FontOrigin = leftScore.MeasureString(lScore) / 2;
-            spriteBatch.DrawString(leftScore, lScore, lPos, Color.LightGreen, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            spriteBatch.DrawString(leftScore, lScore, lPos, Color.Purple, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
             string rScore = "Right: " + leftCount;
             FontOrigin = rightScore.MeasureString(rScore) / 2;
-            spriteBatch.DrawString(rightScore, rScore, rPos, Color.LightGreen, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            spriteBatch.DrawString(rightScore, rScore, rPos, Color.Green, 0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
 
             left.Draw(this.spriteBatch);
             right.Draw(this.spriteBatch);

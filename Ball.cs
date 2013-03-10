@@ -15,11 +15,13 @@ namespace Pong
         const string BALL_ASSETNAME = "paddle";
         const int START_POSITION_X = 0;
         const int START_POSITION_Y = 0;
-        const int BALL_SPEED = 160;
+        const int START_SPEED = 200;
         const int MOVE_UP = -1;
         const int MOVE_DOWN = 1;
         const int MOVE_LEFT = -1;
         const int MOVE_RIGHT = 1;
+        const int MAX_SPEED = 400;
+        int radius;
         ContentManager mContentManager;
 
         public Vector2 mDirection = Vector2.Zero;
@@ -36,14 +38,20 @@ namespace Pong
             Position = new Vector2(START_POSITION_X, START_POSITION_Y);
             base.LoadContent(theContentManager, BALL_ASSETNAME);
             Source = new Rectangle(0, 0, Source.Width, Source.Width);
+            center = new Vector2(Position.X + Source.Width / 2, Position.Y + Source.Height / 2);
+            radius = Source.Width / 2;
         }
         public void Update(GameTime theGameTime)
         {
             KeyboardState aCurrentKeyboardState = Keyboard.GetState();
             UpdateMovement(aCurrentKeyboardState);
             mPreviousKeyboardState = aCurrentKeyboardState;
+            //center = new Vector2(Source.Width / 2, Source.Height / 2);
+            center = new Vector2(Position.X + Source.Width / 2, Position.Y + Source.Height / 2);
             base.Update(theGameTime, mSpeed, mDirection);
         }
+        public int Radius() { return radius; }
+        public int MaxSpeed() { return MAX_SPEED; }
         private void UpdateMovement(KeyboardState aCurrentKeyboardState)
         {
             //if (atStart)
@@ -53,7 +61,7 @@ namespace Pong
                 mDirection = Vector2.Zero;
                 if (aCurrentKeyboardState.IsKeyDown(Keys.Space) == true && mPreviousKeyboardState.IsKeyDown(Keys.Space) == false) //beginning (TODO: alternate L/R per turn, make invalid unless 1 side loses
                 {
-                    mSpeed.X = BALL_SPEED;
+                    mSpeed.X = START_SPEED;
                     if (lastMovedLeft)
                     {
                         mDirection.X = MOVE_LEFT;

@@ -35,6 +35,9 @@ namespace Pong
         //The current position of the Sprite        
         public Vector2 Position = new Vector2(0, 0);
 
+        //The center of the Sprite (with respect to the screen)
+        public Vector2 center = Vector2.Zero;
+
         //The texture object used when drawing the sprite        
         private Texture2D mSpriteTexture;
 

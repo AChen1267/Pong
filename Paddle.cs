@@ -15,12 +15,12 @@ namespace Pong
         const string PADDLE_ASSETNAME = "paddle";
         const int START_POSITION_X = 125;
         const int START_POSITION_Y = 245;
-        const int PADDLE_SPEED = 350;
+        const int PADDLE_SPEED = 450;
         const int MOVE_UP = -1;
         const int MOVE_DOWN = 1;
         const int MOVE_LEFT = -1;
         const int MOVE_RIGHT = 1;
-        //Vector2 mStartingPosition = Vector2.Zero; //tracks at start of jump
+
         ContentManager mContentManager;
 
         Vector2 mDirection = Vector2.Zero;
@@ -38,12 +38,14 @@ namespace Pong
             Position = new Vector2(START_POSITION_X, START_POSITION_Y);
             base.LoadContent(theContentManager, PADDLE_ASSETNAME);
             Source = new Rectangle(0, 0, Source.Width, Source.Height);
+            center = new Vector2(Position.X + Source.Width / 2, Position.Y + Source.Height / 2);
         }
         public void Update(GameTime theGameTime)
         {
             KeyboardState aCurrentKeyboardState = Keyboard.GetState();
             UpdateMovement(aCurrentKeyboardState);
             mPreviousKeyboardState = aCurrentKeyboardState;
+            center = new Vector2(Position.X + Source.Width / 2, Position.Y + Source.Height / 2);
             base.Update(theGameTime, mSpeed, mDirection);
         }
         private void UpdateMovement(KeyboardState aCurrentKeyboardState)
